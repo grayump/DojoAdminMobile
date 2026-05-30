@@ -1,2 +1,0 @@
-# DojoAdminMobile
-Mobile 
