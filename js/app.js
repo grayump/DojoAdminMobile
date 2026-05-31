@@ -271,14 +271,15 @@ const App = (() => {
   }
 
   function _gradingCard(row) {
+    const rankId = row.nextRankId ?? _data.ranks.find(r => r.name === row.nextRankName)?.id;
     return `
-      <div class="grading-card">
+      <button class="grading-card" onclick="App.viewRank(${rankId})">
         <div class="grading-member-name">
           ${_esc(row.memberFullName)}
           ${row.isJunior ? '<span class="badge badge-junior">Junior</span>' : ''}
         </div>
         <div class="grading-next-rank">
-          Testing for: ${_esc(row.nextRankName)}${row.nextRankColorDisplay ? ' (' + _esc(row.nextRankColorDisplay) + ')' : ''}
+          Training for: ${_esc(row.nextRankName)}${row.nextRankColorDisplay ? ' (' + _esc(row.nextRankColorDisplay) + ')' : ''}
         </div>
         <div class="grading-checks">
           ${_pill(row.requirementsMet, `${row.signedOff}/${row.totalRequirements} reqs`)}
@@ -286,7 +287,7 @@ const App = (() => {
           ${_pill(row.attendanceMet, `${row.attendanceSincePromotion}/${row.minAttendance} classes`)}
           ${row.juniorStripeCount > 0 ? _pill(row.juniorStripesMet, `${row.juniorStripesRemoved}/${row.juniorStripeCount} stripes`) : ''}
         </div>
-      </div>`;
+      </button>`;
   }
 
   function _pill(ok, label) {
@@ -348,7 +349,7 @@ const App = (() => {
     return `
       <div class="detail-back">
         <button class="back-btn" onclick="App.goBack()">
-          ${_chevronLeft()} Ranks
+          ${_chevronLeft()} ${_page === 'grading' ? 'Grading' : 'Ranks'}
         </button>
       </div>
       <div class="detail-hero">

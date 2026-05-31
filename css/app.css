@@ -62,6 +62,20 @@ body {
   width: 100%;
 }
 
+.import-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 18px;
+  margin-bottom: 1.25rem;
+}
+
+.import-character {
+  width: 140px;
+  height: auto;
+  margin-bottom: 1rem;
+  opacity: 0.9;
+}
+
 .import-wordmark {
   font-size: 2.5rem;
   font-weight: 800;
@@ -418,12 +432,19 @@ body {
 .grading-dot.not-eligible { background: var(--muted); }
 
 .grading-card {
+  display: block;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
   background: var(--card);
+  border: none;
   border-top: 1px solid var(--border);
   padding: 0.875rem 1rem;
 }
 
 .grading-card:last-of-type { border-bottom: 1px solid var(--border); }
+
+.grading-card:active { background: var(--primary-hover); }
 
 .grading-member-name {
   font-size: 1rem;

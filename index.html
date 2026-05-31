@@ -17,19 +17,21 @@
 
   <!-- Import screen (shown when no data) -->
   <div id="import-screen" class="screen screen-import">
-    <div class="import-content">
-      <div class="import-wordmark">NRKD</div>
-      <div class="import-subtitle">Chito-ryu Companion</div>
-      <div id="import-info" class="import-info hidden"></div>
-      <button class="btn-import" onclick="App.triggerImport()">Import Snapshot</button>
-      <p class="import-help">
-        Export a snapshot from the admin site using the
-        <strong>download</strong> button in the navigation bar,
-        then import it here.
-      </p>
-      <input type="file" id="file-input" accept=".json,application/json"
-             class="hidden" onchange="App.handleFile(this)">
-    </div>
+      <div class="import-content">
+        <img src="icon-512.png" class="import-icon" alt="NRKD">
+          <!-- <img src="karate-character.png" class="import-character" alt="">-->
+          <div class="import-wordmark">NRKD</div>
+          <div class="import-subtitle">Chito-ryu Companion</div>
+          <div id="import-info" class="import-info hidden"></div>
+          <button class="btn-import" onclick="App.triggerImport()">Import Snapshot</button>
+          <p class="import-help">
+              Export a snapshot from the admin site using the
+              <strong>download</strong> button in the navigation bar,
+              then import it here.
+          </p>
+          <input type="file" id="file-input" accept=".json,application/json"
+                 class="hidden" onchange="App.handleFile(this)">
+      </div>
   </div>
 
   <!-- App shell (shown after import) -->
