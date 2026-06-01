@@ -165,7 +165,9 @@ const App = (() => {
       </div>
       <div id="member-list">
         ${_memberListItems()}
-      </div>`;
+      </div>
+      `
+        ;
   }
 
   function _memberListItems() {

@@ -1,4 +1,5 @@
-const CACHE = 'nrkd-mobile-v1';
+//increase the cache version to force update the service worker and cache
+const CACHE = 'nrkd-mobile-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -8,6 +9,7 @@ const ASSETS = [
   './icon-180.png',
   './icon-192.png',
   './icon-512.png',
+  './karate-character.png',
 ];
 
 self.addEventListener('install', e => {
