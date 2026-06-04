@@ -280,6 +280,7 @@ const App = (() => {
           ${_esc(row.memberFullName)}
           ${row.isJunior ? '<span class="badge badge-junior">Junior</span>' : ''}
         </div>
+        ${row.currentRankName ? `<div class="grading-current-rank">${_esc(row.currentRankName)}</div>` : ''}
         <div class="grading-next-rank">
           Training for: ${_esc(row.nextRankName)}${row.nextRankColorDisplay ? ' (' + _esc(row.nextRankColorDisplay) + ')' : ''}
         </div>

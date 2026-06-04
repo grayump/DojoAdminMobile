@@ -455,6 +455,12 @@ body {
   margin-bottom: 0.25rem;
 }
 
+.grading-current-rank {
+  font-size: 0.875rem;
+  color: var(--muted);
+  margin-bottom: 0.125rem;
+}
+
 .grading-next-rank {
   font-size: 0.875rem;
   color: var(--muted);
