@@ -527,6 +527,28 @@ body {
   margin-bottom: 0.125rem;
 }
 
+.req-item:has(.req-status) {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+}
+
+.req-status {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.0625rem;
+}
+
+.req-status svg { width: 18px; height: 18px; }
+.req-status.done { color: #15803d; }
+.req-status.pending { color: var(--muted); }
+
+.req-text { flex: 1; min-width: 0; }
+
 .no-reqs {
   padding: 1.5rem 1rem;
   color: var(--muted);

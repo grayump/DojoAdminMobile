@@ -4,7 +4,7 @@ const App = (() => {
   let _data = null;
   let _page = 'members';
   let _memberSearch = '';
-  let _detailView = null; // { type: 'member'|'rank', id }
+  let _detailView = null; // { type: 'member'|'rank'|'grading', id }
 
   // ── Bootstrap ────────────────────────────────
 
@@ -89,6 +89,11 @@ const App = (() => {
     _render();
   }
 
+  function viewGrading(memberId) {
+    _detailView = { type: 'grading', id: memberId };
+    _render();
+  }
+
   function onMemberSearch(val) {
     _memberSearch = val;
     const list = document.getElementById('member-list');
@@ -141,6 +146,8 @@ const App = (() => {
       main.innerHTML = _renderMemberDetail(_detailView.id);
     } else if (_detailView?.type === 'rank') {
       main.innerHTML = _renderRankDetail(_detailView.id);
+    } else if (_detailView?.type === 'grading') {
+      main.innerHTML = _renderGradingDetail(_detailView.id);
     } else if (_page === 'members') {
       main.innerHTML = _renderMembers();
     } else if (_page === 'grading') {
@@ -273,9 +280,8 @@ const App = (() => {
   }
 
   function _gradingCard(row) {
-    const rankId = row.nextRankId ?? _data.ranks.find(r => r.name === row.nextRankName)?.id;
     return `
-      <button class="grading-card" onclick="App.viewRank(${rankId})">
+      <button class="grading-card" onclick="App.viewGrading(${row.memberId})">
         <div class="grading-member-name">
           ${_esc(row.memberFullName)}
           ${row.isJunior ? '<span class="badge badge-junior">Junior</span>' : ''}
@@ -294,10 +300,66 @@ const App = (() => {
   }
 
   function _pill(ok, label) {
-    const icon = ok
+    return `<span class="check-pill ${ok ? 'ok' : 'fail'}">${_statusIcon(ok)}${_esc(label)}</span>`;
+  }
+
+  function _statusIcon(ok) {
+    return ok
       ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`
-      : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
-    return `<span class="check-pill ${ok ? 'ok' : 'fail'}">${icon}${_esc(label)}</span>`;
+      : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/></svg>`;
+  }
+
+  function _renderGradingDetail(memberId) {
+    const row = _data.gradingRows.find(r => r.memberId === memberId);
+    if (!row) return '<div class="empty-state">Member not found</div>';
+
+    const rank = _data.ranks.find(r => r.id === row.nextRankId);
+    const signedOff = row.signedOffRequirementIds || [];
+
+    const grouped = {};
+    (rank?.requirements || []).forEach(r => {
+      const key = r.categoryDisplay || r.category;
+      (grouped[key] = grouped[key] || []).push(r);
+    });
+
+    return `
+      <div class="detail-back">
+        <button class="back-btn" onclick="App.goBack()">
+          ${_chevronLeft()} Grading
+        </button>
+      </div>
+      <div class="detail-hero">
+        <div class="detail-name">
+          ${_esc(row.memberFullName)}
+          ${row.isJunior ? '<span class="badge badge-junior">Junior</span>' : ''}
+        </div>
+        <div class="detail-rank">
+          Training for: <strong>${_esc(row.nextRankName)}</strong>${row.nextRankColorDisplay ? ' &middot; ' + _esc(row.nextRankColorDisplay) : ''}
+        </div>
+      </div>
+      <div class="grading-checks">
+        ${_pill(row.requirementsMet, `${row.signedOff}/${row.totalRequirements} reqs`)}
+        ${_pill(row.timeMet, `${row.monthsInRank}/${row.minMonths} mo`)}
+        ${_pill(row.attendanceMet, `${row.attendanceSincePromotion}/${row.minAttendance} classes`)}
+        ${row.juniorStripeCount > 0 ? _pill(row.juniorStripesMet, `${row.juniorStripesRemoved}/${row.juniorStripeCount} stripes`) : ''}
+      </div>
+      ${Object.keys(grouped).length === 0
+        ? '<div class="no-reqs">No requirements defined for this rank</div>'
+        : Object.entries(grouped).map(([cat, reqs]) => `
+          <div class="req-group">
+            <div class="req-group-label">${_esc(cat)}</div>
+            ${reqs.map(r => {
+              const done = signedOff.includes(r.id);
+              return `
+              <div class="req-item">
+                <span class="req-status ${done ? 'done' : 'pending'}">${_statusIcon(done)}</span>
+                <span class="req-text">
+                  ${r.subcategory ? `<span class="req-sub">${_esc(r.subcategory)}</span>` : ''}
+                  ${_esc(r.description)}
+                </span>
+              </div>`;
+            }).join('')}
+          </div>`).join('')}`;
   }
 
   // ── Curriculum ───────────────────────────────
@@ -399,6 +461,7 @@ const App = (() => {
     goBack,
     viewMember,
     viewRank,
+    viewGrading,
     onMemberSearch,
   };
 })();
