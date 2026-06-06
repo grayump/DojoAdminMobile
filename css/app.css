@@ -62,6 +62,15 @@ body {
   width: 100%;
 }
 
+.app-version {
+  position: absolute;
+  left: calc(1rem + env(safe-area-inset-left));
+  bottom: calc(1rem + env(safe-area-inset-bottom));
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-variant-numeric: tabular-nums;
+}
+
 .import-icon {
   width: 80px;
   height: 80px;
@@ -321,6 +330,20 @@ body {
 .badge-junior { background: #e5e7eb; color: #374151; }
 .badge-sensei { background: #dbeafe; color: #1e40af; }
 
+.stripe-marks {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.stripe-mark {
+  display: inline-flex;
+  width: 14px;
+  height: 14px;
+  color: #cbd5e1;
+}
+.stripe-mark svg { width: 14px; height: 14px; }
+.stripe-mark.earned { color: #15803d; }
+
 /* ── Detail view ──────────────────────────────── */
 
 .detail-back {
@@ -451,6 +474,7 @@ body {
   font-weight: 600;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 0.375rem;
   margin-bottom: 0.25rem;
 }

@@ -25,7 +25,19 @@ const App = (() => {
 
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js').catch(() => {});
+      navigator.serviceWorker.ready.then(_setVersion).catch(() => {});
     }
+
+    _setVersion();
+  }
+
+  function _setVersion() {
+    if (!('caches' in window)) return;
+    caches.keys().then(keys => {
+      const key = keys.find(k => k.startsWith('nrkd-mobile-'));
+      const el = document.getElementById('app-version');
+      if (key && el) el.textContent = key;
+    });
   }
 
   // ── Import ───────────────────────────────────
@@ -285,6 +297,7 @@ const App = (() => {
         <div class="grading-member-name">
           ${_esc(row.memberFullName)}
           ${row.isJunior ? '<span class="badge badge-junior">Junior</span>' : ''}
+          ${_stripeMarkers(row)}
         </div>
         ${row.currentRankName ? `<div class="grading-current-rank">${_esc(row.currentRankName)}</div>` : ''}
         <div class="grading-next-rank">
@@ -307,6 +320,32 @@ const App = (() => {
     return ok
       ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`
       : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/></svg>`;
+  }
+
+  function _stripeMarkers(row) {
+    if (!row.isJunior || !(row.juniorStripeCount > 0)) return '';
+    const total = row.juniorStripeCount;
+    const remaining = Math.max(0, total - row.juniorStripesRemoved);
+    let pips = '';
+    for (let i = 0; i < total; i++) {
+      const present = i < remaining;
+      pips += `<span class="stripe-mark ${present ? 'remaining' : 'removed'}">${_stripePip(present)}</span>`;
+    }
+    const label = `${remaining} of ${total} stripes remaining`;
+    return `<span class="stripe-marks" title="${label}" aria-label="${label}">${pips}</span>`;
+  }
+
+  function _stripePip(filled) {
+    return filled
+      ? `<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="9"/></svg>`
+      : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/></svg>`;
+  }
+
+  function _stripePill(row) {
+    if (!(row.juniorStripeCount > 0)) return '';
+    const remaining = Math.max(0, row.juniorStripeCount - row.juniorStripesRemoved);
+    const label = row.juniorStripesMet ? 'All cleared' : `${remaining} of ${row.juniorStripeCount} remaining`;
+    return _pill(row.juniorStripesMet, label);
   }
 
   function _renderGradingDetail(memberId) {
@@ -332,6 +371,7 @@ const App = (() => {
         <div class="detail-name">
           ${_esc(row.memberFullName)}
           ${row.isJunior ? '<span class="badge badge-junior">Junior</span>' : ''}
+          ${_stripeMarkers(row)}
         </div>
         <div class="detail-rank">
           Training for: <strong>${_esc(row.nextRankName)}</strong>${row.nextRankColorDisplay ? ' &middot; ' + _esc(row.nextRankColorDisplay) : ''}
