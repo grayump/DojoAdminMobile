@@ -1,5 +1,5 @@
 //increase the cache version to force update the service worker and cache
-const CACHE = 'nrkd-mobile-v2.3';
+const CACHE = 'nrkd-mobile-v2.4';
 const ASSETS = [
   './',
   './index.html',

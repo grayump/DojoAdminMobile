@@ -129,11 +129,17 @@ const App = (() => {
     if (_data) {
       const d = new Date(_data.exportedAt);
       const fmt = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-      el.innerHTML = `<div class="import-info-label">Current data</div>${_data.members.length} members &bull; exported ${fmt}`;
+      el.innerHTML = `<div class="import-info-label">Current data</div>${_data.members.length} members &bull; exported ${fmt}<span class="import-info-open">Open &#8250;</span>`;
       el.classList.remove('hidden');
     } else {
       el.classList.add('hidden');
     }
+  }
+
+  function openCurrentData() {
+    if (!_data) return;
+    _showApp();
+    navigate('members');
   }
 
   function _updateTabs() {
@@ -498,6 +504,7 @@ const App = (() => {
     handleFile,
     navigate,
     showImportScreen,
+    openCurrentData,
     goBack,
     viewMember,
     viewRank,

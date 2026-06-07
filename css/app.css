@@ -106,11 +106,27 @@ body {
   line-height: 1.4;
   margin-bottom: 1.5rem;
   text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  transition: background 0.15s ease;
+}
+
+.import-info:active {
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .import-info-label {
   font-weight: 600;
   margin-bottom: 0.25rem;
+}
+
+.import-info-open {
+  position: absolute;
+  top: 0.75rem;
+  right: 1rem;
+  font-weight: 600;
+  opacity: 0.85;
 }
 
 .btn-import {
