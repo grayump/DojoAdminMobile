@@ -106,6 +106,11 @@ const App = (() => {
     _render();
   }
 
+  function viewLessonPlan(id) {
+    _detailView = { type: 'lessonPlan', id };
+    _render();
+  }
+
   function onMemberSearch(val) {
     _memberSearch = val;
     const list = document.getElementById('member-list');
@@ -149,7 +154,7 @@ const App = (() => {
   }
 
   function _updateHeader() {
-    const titles = { members: 'Members', grading: 'Grading', curriculum: 'Ranks & Curriculum' };
+    const titles = { members: 'Members', grading: 'Grading', curriculum: 'Ranks & Curriculum', lessons: 'Classes' };
     const el = document.getElementById('page-title');
     if (el) el.textContent = titles[_page] ?? '';
   }
@@ -166,12 +171,16 @@ const App = (() => {
       main.innerHTML = _renderRankDetail(_detailView.id);
     } else if (_detailView?.type === 'grading') {
       main.innerHTML = _renderGradingDetail(_detailView.id);
+    } else if (_detailView?.type === 'lessonPlan') {
+      main.innerHTML = _renderLessonPlanDetail(_detailView.id);
     } else if (_page === 'members') {
       main.innerHTML = _renderMembers();
     } else if (_page === 'grading') {
       main.innerHTML = _renderGrading();
     } else if (_page === 'curriculum') {
       main.innerHTML = _renderCurriculum();
+    } else if (_page === 'lessons') {
+      main.innerHTML = _renderLessons();
     }
 
     main.scrollTop = 0;
@@ -481,6 +490,120 @@ const App = (() => {
           </div>`).join('')}`;
   }
 
+  // ── Classes / Lessons ─────────────────────────
+
+  function _renderLessons() {
+    const session = _data.activeSession;
+    if (!session) return '<div class="empty-state">No active session</div>';
+
+    const slots = _data.classSlots ?? [];
+    const classes = _data.scheduledClasses ?? [];
+
+    if (slots.length === 0) return `
+      <div class="list-section-label">${_esc(session.name)}</div>
+      <div class="empty-state">No classes scheduled for this session</div>`;
+
+    const bySlot = {};
+    classes.forEach(c => {
+      (bySlot[c.classSlotId] = bySlot[c.classSlotId] || []).push(c);
+    });
+
+    const rows = slots.map(slot => {
+      const slotClasses = (bySlot[slot.id] || []);
+      const timeRange = _formatTime(slot.startTime) + ' – ' + _formatTime(slot.endTime);
+      const items = slotClasses.map(c => {
+        const dateLabel = _formatClassDate(c.classDate);
+        if (c.cancelled) {
+          return `
+            <div class="list-item list-item-static">
+              <div class="list-item-body">
+                <div class="list-item-main">
+                  <span class="list-item-name">${_esc(dateLabel)}</span>
+                  <span class="badge badge-cancelled">Cancelled</span>
+                </div>
+              </div>
+            </div>`;
+        }
+        if (c.lessonPlanId) {
+          return `
+            <button class="list-item" onclick="App.viewLessonPlan(${c.lessonPlanId})">
+              <div class="list-item-body">
+                <div class="list-item-main"><span class="list-item-name">${_esc(dateLabel)}</span></div>
+                <div class="list-item-sub">${_esc(c.lessonPlanName)}</div>
+              </div>
+              <span class="list-arrow">&#8250;</span>
+            </button>`;
+        }
+        return `
+          <div class="list-item list-item-static">
+            <div class="list-item-body">
+              <div class="list-item-main"><span class="list-item-name">${_esc(dateLabel)}</span></div>
+              <div class="list-item-sub" style="color:var(--muted)">— No lesson assigned</div>
+            </div>
+          </div>`;
+      }).join('');
+
+      return `
+        <div class="list-section-label">${_esc(slot.name)} &middot; ${_esc(timeRange)}</div>
+        ${items || '<div class="empty-state" style="padding:.5rem 1rem .75rem">No classes</div>'}`;
+    }).join('');
+
+    return `
+      <div class="list-section-label" style="color:var(--muted);font-size:.7rem">${_esc(session.name)}</div>
+      ${rows}`;
+  }
+
+  function _renderLessonPlanDetail(id) {
+    const plan = (_data.lessonPlans ?? []).find(p => p.id === id);
+    if (!plan) return '<div class="empty-state">Lesson plan not found</div>';
+
+    const segments = (plan.segments ?? []).slice().sort((a, b) => a.position - b.position);
+
+    return `
+      <div class="detail-back">
+        <button class="back-btn" onclick="App.goBack()">
+          ${_chevronLeft()} Classes
+        </button>
+      </div>
+      <div class="detail-hero">
+        <div class="detail-name">${_esc(plan.name)}</div>
+        ${plan.audienceTag ? `<div class="detail-rank">${_esc(plan.audienceTag)}</div>` : ''}
+      </div>
+      ${plan.notes ? `
+      <div class="detail-section">
+        <div class="detail-section-label">Notes</div>
+        <div class="detail-row"><span class="detail-value">${_esc(plan.notes)}</span></div>
+      </div>` : ''}
+      ${segments.length > 0 ? `
+      <div class="detail-section">
+        <div class="detail-section-label">Lesson Plan</div>
+        ${segments.map(s => `
+          <div class="detail-row">
+            <span class="detail-label">${_esc(_capitalise(s.label))}</span>
+            <span class="detail-value">${s.durationMinutes} min${s.notes ? ' &middot; ' + _esc(s.notes) : ''}</span>
+          </div>`).join('')}
+      </div>` : '<div class="empty-state">No segments defined</div>'}`;
+  }
+
+  function _formatTime(hhmm) {
+    if (!hhmm) return '';
+    const [h, m] = hhmm.split(':').map(Number);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const hour = h % 12 || 12;
+    return `${hour}:${String(m).padStart(2, '0')} ${ampm}`;
+  }
+
+  function _formatClassDate(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr + 'T00:00:00');
+    return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+  }
+
+  function _capitalise(s) {
+    if (!s) return '';
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+
   // ── Utilities ────────────────────────────────
 
   function _esc(s) {
@@ -509,6 +632,7 @@ const App = (() => {
     viewMember,
     viewRank,
     viewGrading,
+    viewLessonPlan,
     onMemberSearch,
   };
 })();
